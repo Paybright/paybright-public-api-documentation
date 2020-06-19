@@ -1,0 +1,950 @@
+openapi: 3.0.2
+info:
+  title: Enterprise API
+  description: PayBright enterprise API
+  version: v0.0.1
+servers:
+- url: https://virtserver.swaggerhub.com/pay-bright/customer-portal/1.0.0
+  description: SwaggerHub API Auto Mocking
+- url: https://api.paybright.com/v1
+paths:
+  /customers/auth/send_pin/:
+    post:
+      tags:
+      - stage:SPECIFIED
+      - module:Account/Authentication flow
+      summary: Generate an authentication PIN.
+      description: Receive the Customer's Phone number to generate an authentication
+        PIN for that mobile phone using Okta.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/body'
+      responses:
+        "400":
+          description: The Phone Number provided in the request was considered invalid
+            by the mechanism.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+        "403":
+          description: The Customer Account connected with this phone number was locked
+            and the request cannot be fullfulled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_403'
+        "200":
+          description: PIN Generated with Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+  /customers/auth/check_pin/:
+    post:
+      tags:
+      - stage:SPECIFIED
+      - module:Account/Authentication flow
+      summary: Sends authentication PIN for verification.
+      description: Receive the Customer's PIN to validate its authentication. If the
+        phone number does not belong to a Customer, a new Customer will be created.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/body_1'
+      responses:
+        "400":
+          description: The PIN provided in the request is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+        "403":
+          description: The Customer Account connected with this phone number was locked
+            and the request cannot be fullfulled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_403'
+        "200":
+          description: PIN validated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+  /customers/auth/refresh/:
+    post:
+      tags:
+      - stage:SPECIFIED
+      - module:Account/Authentication flow
+      summary: Sends a token refresh request.
+      description: Refreshes the token for contiued access to the backend endpoints.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/body_2'
+      responses:
+        "400":
+          description: The refresh token provided in the request is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_2'
+        "403":
+          description: Customer not authenticated or invalid access token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_403_1'
+        "200":
+          description: Token refreshed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+      security:
+      - bearerAuth: []
+  /customers/auth/signout/:
+    post:
+      tags:
+      - stage:SPECIFIED
+      - module:Account/Authentication flow
+      summary: Signs out logged in customer, terminating the session.
+      description: Signs out logged in customer, terminating the session and invalidating
+        all tokens.
+      responses:
+        "403":
+          description: Customer not authenticated or invalid access token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_403_1'
+        "200":
+          description: Customer signed out successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+      security:
+      - bearerAuth: []
+  /customers/{customerId}:
+    get:
+      tags:
+      - stage:SPECIFIED
+      - module:Account/Authentication flow
+      summary: Obtains details about a Customer with the specific ID.
+      description: Receive the Customer's PIN to validate its authentication. If the
+        phone number does not belong to a Customer, a new Customer will be created.
+      parameters:
+      - name: customerId
+        in: path
+        description: The Customer ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+          example: 69f78369-3410-4684-bd64-d6d8457970d9
+      responses:
+        "200":
+          description: Returns the details of the Customer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_2'
+        "403":
+          description: Customer not authenticated or invalid access token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_403_1'
+        "404":
+          description: Customer does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      security:
+      - bearerAuth: []
+    put:
+      tags:
+      - stage:SPECIFIED
+      - module:Account/Authentication flow
+      summary: Update fields of a customer.
+      description: Updates some of the fields for an existing Customer
+      parameters:
+      - name: customerId
+        in: path
+        description: The Customer ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+          example: 69f78369-3410-4684-bd64-d6d8457970d9
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerBody'
+      responses:
+        "200":
+          description: Successfully updated Customer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompleteCustomer'
+        "400":
+          description: Customer submitted is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_3'
+        "403":
+          description: Customer not authenticated or invalid access token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_403_1'
+        "404":
+          description: Customer does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - stage:SPECIFIED
+      - module:Account/Authentication flow
+      summary: Update fields of a customer.
+      description: Updates some of the fields for an existing Customer
+      parameters:
+      - name: customerId
+        in: path
+        description: The Customer ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+          example: 69f78369-3410-4684-bd64-d6d8457970d9
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerBody'
+      responses:
+        "200":
+          description: Successfully patched PaymentInformation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompleteCustomer'
+        "400":
+          description: Customer submitted is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_3'
+        "403":
+          description: Customer not authenticated or invalid access token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_403_1'
+        "404":
+          description: Customer does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      security:
+      - bearerAuth: []
+  /customers/{customerId}/sin:
+    post:
+      tags:
+      - stage:SPECIFIED
+      - module:Account/Authentication flow
+      summary: Update SIN and legal name for a customer.
+      parameters:
+      - name: customerId
+        in: path
+        description: The Customer ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+          example: 69f78369-3410-4684-bd64-d6d8457970d9
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/body_3'
+      responses:
+        "200":
+          description: Successfully Updated Customer Information.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "400":
+          description: Data submitted is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_3'
+        "403":
+          description: Customer not authenticated or invalid access token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_403_1'
+        "404":
+          description: Customer does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      security:
+      - bearerAuth: []
+  /customers/{customerId}/credit:
+    get:
+      tags:
+      - stage:SPECIFIED
+      - module:Account/Authentication flow
+      summary: Obtain the credit status/limits of a customer.
+      description: This endpoint will return the credit status and limits for a customer.
+      parameters:
+      - name: customerId
+        in: path
+        description: The Customer ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+          example: 69f78369-3410-4684-bd64-d6d8457970d9
+      responses:
+        "200":
+          description: Successfully Returned Customer Credit status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerCredit'
+        "202":
+          description: Credit verification is still being processed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_202'
+        "400":
+          description: Data submitted is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_3'
+        "403":
+          description: Customer not authenticated or invalid access token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_403_1'
+        "404":
+          description: Customer does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      security:
+      - bearerAuth: []
+  /payment_information:
+    summary: Customer credit card details.
+    get:
+      tags:
+      - stage:DRAFT
+      - module:Payment information
+      summary: Get all payment methods and their information for a customer.
+      responses:
+        "200":
+          description: Array of payment method objects. Empty array if no payment
+            information is present.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentInformation'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - stage:DRAFT
+      - module:Payment information
+      summary: Add payment method for customer.
+      description: Add payment method for the customer to make purchases.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentInformation'
+      responses:
+        "201":
+          description: Successfully created PaymentInformation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "400":
+          description: PaymentInformation submitted is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_3'
+        "403":
+          description: Customer not authenticated or invalid access token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_403_1'
+      security:
+      - bearerAuth: []
+  /payment_information/{paymentInformationId}:
+    put:
+      tags:
+      - stage:DRAFT
+      - module:Payment information
+      summary: Update a payment method for a customer.
+      parameters:
+      - name: paymentInformationId
+        in: path
+        description: The PaymentInformation ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+          example: db162d01-341b-4bca-887d-a76600c78700
+      responses:
+        "200":
+          description: Successfully updated PaymentInformation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentInformation'
+        "404":
+          description: Payment Information does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "400":
+          description: PaymentInformation submitted is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_3'
+        "403":
+          description: Customer not authenticated or invalid access token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_403_1'
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - stage:DRAFT
+      - module:Payment information
+      summary: Remove a payment method for customer.
+      parameters:
+      - name: paymentInformationId
+        in: path
+        description: The PaymentInformation ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+          example: db162d01-341b-4bca-887d-a76600c78700
+      responses:
+        "200":
+          description: Successfully deleted PaymentInformation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "404":
+          description: Payment Information does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "400":
+          description: PaymentInformation submitted is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_3'
+        "403":
+          description: Customer not authenticated or invalid access token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_403_1'
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - stage:DRAFT
+      - module:Payment information
+      summary: Update a payment method for a customer.
+      parameters:
+      - name: paymentInformationId
+        in: path
+        description: The PaymentInformation ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+          example: db162d01-341b-4bca-887d-a76600c78700
+      responses:
+        "200":
+          description: Successfully patched PaymentInformation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentInformation'
+        "404":
+          description: Payment Information does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "400":
+          description: PaymentInformation submitted is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_3'
+        "403":
+          description: Customer not authenticated or invalid access token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_403_1'
+      security:
+      - bearerAuth: []
+components:
+  schemas:
+    EmptyCustomer:
+      required:
+      - phoneNumber
+      type: object
+      properties:
+        id:
+          type: string
+          description: Auto-generated UUID of the Customer
+          format: uuid
+          example: 69f78369-3410-4684-bd64-d6d8457970d9
+        phoneNumber:
+          pattern: ^\d{10}$
+          type: string
+          description: Phone Number used for identifying the Customer
+          format: number
+          example: "8772762780"
+        createdAt:
+          type: string
+          description: Auto-generated datetime of account creation
+          format: date-time
+          example: 2017-07-21T17:32:28Z
+      description: Empty Customer created when the PIN is successfully validated
+    BaseCustomer:
+      allOf:
+      - $ref: '#/components/schemas/EmptyCustomer'
+      - required:
+        - email
+        - firstName
+        - lastName
+        type: object
+        properties:
+          firstName:
+            type: string
+            description: First name of the Customer
+            example: James
+          lastName:
+            type: string
+            description: Last name of the Customer
+            example: Kirk
+          middleInitial:
+            type: string
+            description: Middle Initial of the Customer
+            example: T
+          email:
+            type: string
+            description: Email Address of the Customer
+            format: email
+            example: james.kirk@starfleet.com
+          updatedAt:
+            type: string
+            description: Auto-generated datetime of the last modification
+            format: date-time
+            example: 2017-07-21T17:32:28Z
+        description: Incomplete Customer record from previous products or saved partially
+          during the Account Creation process
+    CompleteCustomer:
+      allOf:
+      - $ref: '#/components/schemas/BaseCustomer'
+      - required:
+        - birthdate
+        - homeAddress
+        type: object
+        properties:
+          homeAddress:
+            $ref: '#/components/schemas/Address'
+          shippingAddress:
+            $ref: '#/components/schemas/Address'
+          birthdate:
+            type: string
+            description: Date of Birth of the Customer
+            format: date
+            example: 2001-01-22
+        description: Complete Customer with all necessary information
+    CustomerBody:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: First name of the Customer
+          example: James
+        lastName:
+          type: string
+          description: Last name of the Customer
+          example: Kirk
+        middleInitial:
+          type: string
+          description: Middle Initial of the Customer
+          example: T
+        email:
+          type: string
+          description: Email Address of the Customer
+          format: email
+          example: james.kirk@starfleet.com
+        homeAddress:
+          $ref: '#/components/schemas/Address'
+        shippingAddress:
+          $ref: '#/components/schemas/Address'
+        birthdate:
+          type: string
+          description: Date of Birth of the Customer
+          format: date
+          example: 2001-01-22
+      description: Customer fields that can be updated
+    CustomerCredit:
+      type: object
+      properties:
+        customerId:
+          type: string
+          description: Reference UUID of the Customer
+          format: uuid
+          example: 69f78369-3410-4684-bd64-d6d8457970d9
+        status:
+          type: string
+          description: Status of the Customer's credit verification. 'approved' means
+            the Customer has an approved limit. 'pending' means the credit verification
+            did not taken place yet. 'processing' means the credit verification is
+            underway. 'denied' means the credit verification returned negative.
+          example: approved
+          enum:
+          - approved
+          - pending
+          - processing
+          - denied
+        limit:
+          type: number
+          description: Global Credit limit of the Customer in Canadian Dollars.
+          format: float
+          example: 12000.0
+        createdAt:
+          type: string
+          description: Auto-generated datetime of the credit record for this Customer
+          format: date-time
+          example: 2017-07-21T17:32:28Z
+        updatedAt:
+          type: string
+          description: Auto-generated datetime of the last change in the credit record
+            for this Customer
+          format: date-time
+          example: 2017-07-21T17:32:28Z
+      description: Credit Status and Limit of the Customer
+    Address:
+      required:
+      - city
+      - number
+      - province
+      - street
+      type: object
+      properties:
+        street:
+          type: string
+          description: Street Name and Type
+          example: York St
+        number:
+          type: string
+          description: Number on the Street
+          example: "125"
+        city:
+          type: string
+          description: Name of the City
+          example: Toronto
+        province:
+          pattern: ^[A-Z]{2}$
+          type: string
+          description: Province Acronym
+          example: "ON"
+      description: An address object to be used as a value by other entities
+    PaymentInformation:
+      required:
+      - NameOnCard
+      - billingAddress
+      - cardNumber
+      - ccv
+      - expiryDate
+      - isDefault
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: db162d01-341b-4bca-887d-a76600c78700
+        customerId:
+          type: string
+          format: uuid
+          example: 69f78369-3410-4684-bd64-d6d8457970d9
+        nameOnCard:
+          type: string
+          example: Nick Adams
+        cardNumber:
+          type: string
+          example: "12345678"
+        expiryDate:
+          type: string
+          format: date
+          example: 2022-12-12
+        ccv:
+          type: string
+          format: number
+          example: "191"
+        isDefault:
+          type: boolean
+          example: true
+        billingAddress:
+          $ref: '#/components/schemas/Address'
+    body:
+      type: object
+      properties:
+        phoneNumber:
+          pattern: ^\d{10}$
+          type: string
+          format: number
+          example: "8772762780"
+        sendType:
+          type: string
+          enum:
+          - SMS
+          - CALL
+    inline_response_400:
+      type: object
+      properties:
+        code:
+          type: string
+          example: error
+        message:
+          type: string
+          example: invalid-phone-number
+    inline_response_403:
+      type: object
+      properties:
+        code:
+          type: string
+          example: error
+        message:
+          type: string
+          example: account-locked
+    inline_response_200:
+      type: object
+      properties:
+        code:
+          type: string
+          example: ok
+        message:
+          type: string
+          example: success
+    body_1:
+      type: object
+      properties:
+        phoneNumber:
+          pattern: ^\d{10}$
+          type: string
+          format: number
+          example: "8772762780"
+        pin:
+          maximum: 9999
+          minimum: 0
+          type: integer
+          example: 1234
+    inline_response_400_1:
+      type: object
+      properties:
+        code:
+          type: string
+          example: error
+        message:
+          type: string
+          example: invalid-pin
+    inline_response_200_1:
+      type: object
+      properties:
+        customerId:
+          type: string
+          example: 69f78369-3410-4684-bd64-d6d8457970d9
+        accessToken:
+          type: string
+          example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiVlx1MDAxNcKbwoNUwoonbFPCu8KhwrYiLCJpYXQiOjE0NDQyNjI1NDMsImV4cCI6MTQ0NDI2MjU2M30.MldruS1PvZaRZIJR4legQaauQ3_DYKxxP2rFnD37Ip4
+        expiresIn:
+          type: number
+          example: 3600
+        refreshToken:
+          type: string
+          example: fdb8fdbecf1d03ce5e6125c067733c0d51de209c
+    body_2:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          example: fdb8fdbecf1d03ce5e6125c067733c0d51de209c
+    inline_response_400_2:
+      type: object
+      properties:
+        code:
+          type: string
+          example: error
+        message:
+          type: string
+          example: invalid-token
+    inline_response_403_1:
+      type: object
+      properties:
+        code:
+          type: string
+          example: error
+        message:
+          type: string
+          example: access-denied
+    inline_response_200_2:
+      oneOf:
+      - $ref: '#/components/schemas/EmptyCustomer'
+      - $ref: '#/components/schemas/BaseCustomer'
+      - $ref: '#/components/schemas/CompleteCustomer'
+    inline_response_404:
+      type: object
+      properties:
+        code:
+          type: string
+          example: error
+        message:
+          type: string
+          example: not-found
+    inline_response_400_3:
+      type: object
+      properties:
+        code:
+          type: string
+          example: error
+        message:
+          type: string
+          example: invalid-fields
+    body_3:
+      type: object
+      properties:
+        sin:
+          type: number
+          description: Customer's SIN
+          example: 12345678
+        legalFirstName:
+          type: string
+          description: Customer's Legal first name
+          example: JAMES T
+        legalLastName:
+          type: string
+          description: Customer's Legal last name
+          example: KIRK
+    inline_response_202:
+      type: object
+      properties:
+        status:
+          type: string
+          example: processing
+          enum:
+          - processing
+        tryAgainIn:
+          type: number
+          format: integer
+          example: 60
+        createdAt:
+          type: string
+          format: date-time
+          example: 2017-07-21T17:32:28Z
+  responses:
+    NotAuthenticated:
+      description: Customer not authenticated or invalid access token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/inline_response_403_1'
+    UnauthorizedError:
+      description: Customer not authenticated
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: string
+                example: error
+              message:
+                type: string
+                example: unauthorized
+    AccountLocked:
+      description: The Customer Account connected with this phone number was locked
+        and the request cannot be fullfulled.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/inline_response_403'
+    CustomerNotFound:
+      description: Customer does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/inline_response_404'
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Opaque Access Token.
