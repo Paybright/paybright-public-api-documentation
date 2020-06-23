@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v1
       - uses: readmeio/github-readme-sync@1.0.3
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}" # DON'T MODIFY--Allows us to get the contents of your spec file
